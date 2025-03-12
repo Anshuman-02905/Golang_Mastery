@@ -1,0 +1,69 @@
+Here are the functional and non-functional requirements for your bookstore management system:
+
+### **Functional Requirements**
+1. **User Management**  
+   - Users can sign up, log in, and log out.
+   - Admins can manage users (create, update, delete).
+
+2. **Book Management**  
+   - Add new books (title, author, price, category, stock, etc.).
+   - Update book details.
+   - Delete books.
+   - Fetch a list of all books.
+   - Fetch details of a specific book by ID.
+
+3. **Order Management**  
+   - Users can add books to a cart.
+   - Users can place an order.
+   - Order history should be stored.
+   - Admin can view all orders.
+
+4. **Inventory Management**  
+   - Track stock levels.
+   - Prevent purchases if stock is unavailable.
+   - Notify when stock is low.
+
+5. **Search & Filter**  
+   - Search books by title, author, or category.
+   - Filter books by price, availability, and genre.
+
+6. **Reviews & Ratings**  
+   - Users can rate and review books.
+   - Average rating should be displayed.
+
+7. **Payment & Checkout**  
+   - Support multiple payment methods.
+   - Generate invoices.
+
+8. **Reports & Analytics**  
+   - Sales reports for admins.
+   - Best-selling books.
+
+---
+
+### **Non-Functional Requirements**
+1. **Security**  
+   - Secure user authentication (JWT or OAuth).
+   - Role-based access (admin vs. customer).
+   - Encrypt sensitive data.
+
+2. **Performance**  
+   - Optimize database queries.
+   - Implement caching for frequent queries.
+
+3. **Scalability**  
+   - Support for a growing number of books and users.
+
+4. **Maintainability**  
+   - Use a modular project structure.
+   - Proper logging and error handling.
+
+5. **API Documentation**  
+   - Provide Swagger or Postman API docs.
+
+Would you like a basic implementation template for the routes?
+
+
+database
+
+/Users/anshumanmandal/Golang/Tutorial/Webserver/src/go-BookManagementSystem/database/Library.db

@@ -1,0 +1,8 @@
+{
+    "HOST":"localhost",
+    "PORT":"5432",
+    "POSTGRES_PASSWORD":"S3cret",
+    "POSTGRES_USER":"Anshu_user",
+    "POSTGRES_DB":"Library_db",
+    "SSL_MODE":"disable"
+}
