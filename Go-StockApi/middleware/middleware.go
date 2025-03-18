@@ -235,9 +235,14 @@ func getStock(id int64) (models.Stock, error) {
 	}
 
 	return stock, err
-
 }
 
+// getAllStocks retrieves all stock records from the database.
+/*
+   Returns:
+   - []models.Stock: List of stocks.
+   - error: Error if any occurs.
+*/
 func getAllstocks() ([]models.Stock, error) {
 
 	db := connectDatabase()
@@ -249,20 +254,29 @@ func getAllstocks() ([]models.Stock, error) {
 
 	rows, err := db.Query(sqlStatemet)
 	if err != nil {
-		log.Fatalf("Unable to execute the query. %v", err)
+		log.Fatalf("❌ Unable to execute the query. %v", err)
 	}
 
 	for rows.Next() {
 		var stock models.Stock
 		err := rows.Scan(&stock.StockID, &stock.Name, &stock.Price, &stock.Company)
 		if err != nil {
-			log.Fatalf("unableto scan row. %v", err)
+			log.Fatalf("❌ Unableto scan row. %v", err)
 		}
 		stocks = append(stocks, stock)
 	}
 	return stocks, err
-
 }
+
+// updateStock updates a stock record.
+/*
+   Args:
+   - id (int64): Stock ID.
+   - stock (models.Stock): Updated stock details.
+
+   Returns:
+   - int64: Number of rows affected.
+*/
 func updateStock(id int64, stock models.Stock) int64 {
 	db := connectDatabase()
 	defer db.Close()
@@ -271,17 +285,26 @@ func updateStock(id int64, stock models.Stock) int64 {
 	res, err := db.Exec(sqlStatement, id, stock.Name, stock.Price, stock.Company)
 
 	if err != nil {
-		log.Fatalf("Unable to execure query %v", err)
+		log.Fatalf("❌ Query execution failed: %v", err)
 	}
 	rowAffected, err := res.RowsAffected()
 
 	if err != nil {
-		log.Fatalf("Error while chekcing affected rows %v", err)
+		log.Fatalf("❌ Error while chekcing affected rows %v", err)
 	}
 	fmt.Printf("Total rows affected %v ", err)
 
 	return rowAffected
 }
+
+// deleteStock deletes a stock record.
+/*
+   Args:
+   - id (int64): Stock ID.
+
+   Returns:
+   - int64: Number of rows affected.
+*/
 
 func deleteStock(id int64) int64 {
 	db := connectDatabase()
@@ -296,7 +319,7 @@ func deleteStock(id int64) int64 {
 	}
 	rowsAffected, err := res.RowsAffected()
 	if err != nil {
-		log.Fatalf("Error while checking the affected rows. %v", err)
+		log.Fatalf("❌ Error while checking the affected rows. %v", err)
 	}
 
 	fmt.Printf("Total rows/record affected %v", rowsAffected)
