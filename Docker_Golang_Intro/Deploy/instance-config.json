@@ -1,0 +1,8 @@
+{
+    "ImageId":"ami-02455cce11ac4bd45",
+    "InstanceType": "t4g.nano",
+    "KeyName": "kube-demo",
+    "MinCount": 1,
+    "MaxCount": 1
+  }
+  
