@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"stock/config"
@@ -47,6 +48,14 @@ func connectDatabase() *sql.DB {
 	return db
 }
 
+func GetHelloStock(w http.ResponseWriter, r *http.Request) {
+	res := response{
+		ID:      int64(1),
+		Message: " Hi this is stock API",
+	}
+	json.NewEncoder(w).Encode(res)
+}
+
 //CreateStock handles the creation of a new Stock
 /*
 Args:
@@ -60,11 +69,19 @@ func CreateStock(w http.ResponseWriter, r *http.Request) {
 
 	var stock models.Stock
 
-	err := json.NewDecoder(r.Body).Decode(&stock)
-	if err != nil {
-		log.Fatalf("❌ Unable to decode the request body: %v", err)
-	}
+	//err := json.NewDecoder(r.Body).Decode(&stock)
 
+	body, _ := io.ReadAll(r.Body)
+	fmt.Println("📌 Raw request body:", string(body)) // Debugging
+	err := json.Unmarshal(body, &stock)
+
+	if err != nil {
+		//log.Fatalf("❌ Unable to decode the request body: %v", err)
+		log.Fatalf("❌ Unable to decode JSON: %v", err)
+
+		return
+	}
+	fmt.Println("Inserteing Stock")
 	insertID := insertStock(stock)
 
 	res := response{
@@ -197,11 +214,13 @@ func insertStock(stock models.Stock) int64 {
 	db := connectDatabase()
 	defer db.Close()
 
-	sqlStatement := "INSERT INTO STOCK  (name,price,company) VALUES ($1 ,$2, $3)RETURNING stockid"
+	sqlStatement := "INSERT INTO stock (name, price, company) VALUES ($1, $2, $3) RETURNING stockid;"
+
 	var id int64
-	err := db.QueryRow(sqlStatement, stock.Name, stock.Price, stock.Company)
+	err := db.QueryRow(sqlStatement, stock.Name, stock.Price, stock.Company).Scan(&id)
 	if err != nil {
 		log.Fatalf("❌ Unable to insert stock %v", err)
+		return -1
 	}
 	fmt.Printf("✅ Inserted Single Record. %v", id)
 	return id
@@ -250,7 +269,7 @@ func getAllstocks() ([]models.Stock, error) {
 
 	var stocks []models.Stock
 
-	sqlStatemet := "SELECT * FROM stocks"
+	sqlStatemet := "SELECT * FROM stock"
 
 	rows, err := db.Query(sqlStatemet)
 	if err != nil {
@@ -280,7 +299,7 @@ func getAllstocks() ([]models.Stock, error) {
 func updateStock(id int64, stock models.Stock) int64 {
 	db := connectDatabase()
 	defer db.Close()
-	sqlStatement := "UPDATE stocks SET name=$2, price=$3, company=$4 WHERE stockid=$1"
+	sqlStatement := "UPDATE stock SET name=$2, price=$3, company=$4 WHERE stockid=$1"
 
 	res, err := db.Exec(sqlStatement, id, stock.Name, stock.Price, stock.Company)
 
@@ -310,7 +329,7 @@ func deleteStock(id int64) int64 {
 	db := connectDatabase()
 	defer db.Close()
 
-	sqlStatement := "DELETE FROM stocks WHERE stockid=$1"
+	sqlStatement := "DELETE FROM stock WHERE stockid=$1"
 
 	res, err := db.Exec(sqlStatement, id)
 

@@ -17,7 +17,7 @@ func main() {
 	// Server start message
 	fmt.Println("🚀 Starting server on the port 8080...")
 
-	if err := http.ListenAndServe(":8080", r); err != nil {
+	if err := http.ListenAndServe(":8081", r); err != nil {
 		log.Fatalf("❌ Failed to start server : %v", err)
 	}
 

@@ -14,6 +14,7 @@ import (
 func SetupRoutes() *mux.Router {
 	r := mux.NewRouter()
 
+	r.HandleFunc("/", middleware.GetHelloStock).Methods("GET", "OPTIONS")
 	// Route to fetch a single stock by ID
 	r.HandleFunc("/api/stock/{id}", middleware.GetStock).Methods("GET", "OPTIONS")
 
