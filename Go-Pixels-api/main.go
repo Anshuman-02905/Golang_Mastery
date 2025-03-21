@@ -1,252 +1,29 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 	"log"
-	"math/rand"
-	"net/http"
-	"os"
-	"strconv"
-	"time"
+
+	"github.com/Anshuman-02905/Golang-Mastery/Go-Pixels-api/handler"
 )
-
-const (
-	PhotosApi = "https://api.pixels.com/v1"
-	VideoApi  = "https//api.pexels.com/videos"
-)
-
-type Client struct {
-	token          string
-	hc             http.Client
-	RemainingTimes int32
-}
-
-func NewClient(token string) *Client {
-	var c = http.Client{}
-	return &Client{token: token, hc: c}
-}
-
-type SearchResult struct {
-	Page        int32   `json:"page"`
-	PerPage     int32   `json:"per_page"`
-	TotalResuls int32   `json:"total_results"`
-	NextPage    string  `json:"next_page"`
-	Photos      []Photo `json:"phots"` //slice of photos
-}
-
-type Photo struct {
-	ID              int32       `json:"id"`
-	Width           int32       `json:"width"`
-	Height          int32       `json:"height"`
-	Url             int32       `json:"url"`
-	Photographer    string      `json:"photographer"`
-	PhotographerURL string      `json:"photographer_url"`
-	Src             PhotoSource `json:"src"`
-}
-
-type PhotoSource struct {
-	Original  string `json:"original"`
-	Large     string `json:"large"`
-	Large2x   string `json:"large2x"`
-	Medium    string `json:"medium"`
-	Small     string `json:"small"`
-	Portrait  string `json:"portrait"`
-	Square    string `json:"square"`
-	Landscape string `json:"landscape"`
-	Tiny      string `json:"tiny"`
-}
-type CuratedResult struct {
-	Page     int32   `json:"page"`
-	PerPage  int32   `json:"per_page"`
-	NextPage string  `json:"next_page"`
-	Photos   []Photo `json:"photos"`
-}
-
-type VideoSearchResult struct {
-	Page         int32   `json:"page"`
-	PerPage      int32   `json:"per_page"`
-	TotalResults int32   `json:"total_results"`
-	NextPage     string  `json:"next_page"`
-	Videos       []Video `son:"videos"`
-}
-type Video struct {
-	Id            int32           `json:"id"`
-	Width         int32           `json:"width"`
-	Height        int32           `json:"height"`
-	Url           string          `json:"url"`
-	Image         string          `json:"image"`
-	FullRes       interface{}     `json:"full_res"`
-	Duration      float64         `json:"duration"`
-	VideoFiles    []VideoFiles    `json:"videoFiles"`
-	VideoPictures []VideoPictures `json:"videoPictures"`
-}
-type PopularVideos struct {
-	Page         int32   `json:"page"`
-	PerPage      int32   `json:"per_page"`
-	TotalResults int32   `json:"total_results"`
-	Url          string  `json:"url"`
-	Videos       []Video `json:"videos"`
-}
-
-type VideoFiles struct {
-	Id       int32  `json:"id"`
-	Quality  string `json:"quality"`
-	FileType string `json:"file_type"`
-	Width    int32  `json:"width"`
-	Height   int32  `json:"height"`
-	Link     string `json:"link"`
-}
-
-type VideoPictures struct {
-	id      int32 `json:"id"`
-	Picture int32 `json:"picture"`
-	Nr      int32 `json:"nr"`
-}
-
-func (c *Client) SearchPhotos(query string, perPage, page int) (*SearchResult, error) {
-	url := fmt.Sprintf(PhotosApi+"/search?query=%s&per_page=%d&page=%d", query, perPage, page)
-	resp, err := c.requestDoWithAuth("GET", url)
-	defer resp.Body.Close()
-
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	var result SearchResult
-	json.Unmarshal(data, &result)
-
-	return &result, err
-}
-
-func (c *Client) requestDoWithAuth(method, url string) (*http.Response, error) {
-	req, err := http.NewRequest(method, url, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Add("Authorization", c.token)
-	resp, err := c.hc.Do(req)
-	if err != nil {
-		return resp, err
-	}
-	times, err := strconv.Atoi(resp.Header.Get("X-Ratelimit-Remaining"))
-	if err != nil {
-		return resp, nil
-	} else {
-		c.RemainingTimes = int32(times)
-	}
-	return resp, nil
-}
-
-func (c *Client) CuratedPhotos(perPage, page int) (*CuratedResult, error) {
-	url := fmt.Sprintf(PhotosApi+"/curated?&per_page=%d&page=%d", perPage, page)
-	resp, err := c.requestDoWithAuth("GET", url)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var result CuratedResult
-
-	err = json.Unmarshal(data, &result)
-	return &result, err
-
-}
-func (c *Client) GetPhoto(id int32) (*Photo, error) {
-	url := fmt.Sprintf(PhotosApi+"/photos?%d", id)
-	resp, err := c.requestDoWithAuth("GET", url)
-	defer resp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-	data, err := io.ReadAll(resp.Body)
-	var result Photo
-	err = json.Unmarshal(data, result)
-	if err != nil {
-		return nil, err
-	}
-	return &result, nil
-
-}
-
-func (c *Client) GetRandomPhoto() (*Photo, error) {
-	rand.Seed(time.Now().Unix())
-	randNum := rand.Intn(1001)
-	result, err := c.CuratedPhotos(1, randNum)
-	if err == nil && len(result.Photos) == 1 {
-		return &result.Photos[0], nil
-	}
-	return nil, err
-
-}
-
-func (c *Client) SearchVideo(query, perPage, page int) (*VideoSearchResult, error) {
-
-	url := fmt.Sprintf(VideoApi+"/search?query=%s&per_page=%d&page=%d", query, perPage, page)
-	resp, err := c.requestDoWithAuth("GET", url)
-	defer resp.Body.Close()
-
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	var result VideoSearchResult
-	json.Unmarshal(data, &result)
-
-	return &result, err
-}
-
-func (c *Client) PopularVideo(perPage, page int) (*PopularVideos, error) {
-	url := fmt.Sprintf(VideoApi+"/popular?per_page=%d&page=%d", perPage, page)
-	resp, err := c.requestDoWithAuth("GET", url)
-	defer resp.Body.Close()
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var result PopularVideos
-	json.Unmarshal(data, &result)
-	return &result, err
-
-}
-
-func (c *Client) GetRandomVideo() (*Video, error) {
-	rand.Seed(time.Now().Unix())
-	randNum := rand.Intn(1001)
-	result, err := c.PopularVideo(1, randNum)
-	if err == nil && len(result.Videos) == 1 {
-		return &result.Videos[0], nil
-	}
-	return nil, err
-
-}
-
-func (c *Client) GetRemainingRequestInthisMonth() int32 {
-	return c.RemainingTimes
-}
 
 func main() {
+	//LOAD THE ENV FILE
 
-	os.Setenv("Pexels_TOKEN", "HDyG0SQY9UgD1FTY7YnKGvJd97NeoGKMn150AJ5JVrdFU1WvRVxUABiz")
-	var TOKEN = os.Getenv("Pexels_TOKEN")
-	var c = NewClient(TOKEN)
+	ac := handler.NewAuthenticatedClient()
+	//results, err := ac.SearchPhotos("waves", "15", "1")
+	//results, err := ac.CuratedPhotos("1", "1")
+	//results, err := ac.GetPhoto("2014422")
+	//results, err := ac.SearchVideos("waves", "1", "2")
 
-	result, err := c.SearchPhotos("waves", 15, 1)
+	//results, err := ac.PopularVideos("1")
+
+	results, err := ac.GetVideos("2499611")
+
+	fmt.Println(ac.RemainingTimes)
 	if err != nil {
-		log.Fatalf("Error in Searching Photos %v", err)
+		log.Fatalf("Unable to SeatchPhotos %v", err)
 	}
-
-	if result.Page == 0 {
-		log.Fatalf("Search Result return none")
-	}
-
-	print(result)
+	fmt.Println(results)
 
 }

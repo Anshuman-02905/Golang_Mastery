@@ -11,6 +11,7 @@ import (
    Returns:
    - *mux.Router: A configured router instance with all stock-related routes.
 */
+
 func SetupRoutes() *mux.Router {
 	r := mux.NewRouter()
 
