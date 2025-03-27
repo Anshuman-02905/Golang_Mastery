@@ -1,0 +1,79 @@
+package main
+
+import "fmt"
+
+type Node struct {
+	data string
+	next *Node
+	prev *Node
+}
+
+type DoubleLinkedList struct {
+	head   *Node
+	tail   *Node
+	length int
+}
+
+var MAX_LENGTH int
+var DLL DoubleLinkedList
+var m map[string]Node
+
+func Create_node(val string) {
+	ND := Node{
+		data: val,
+		next: nil,
+		prev: nil,
+	}
+	m[val] = ND
+
+}
+
+func RemoveNode() {
+
+	ND := DLL.tail
+	ND.prev.next = DLL.tail
+	DLL.tail = ND.prev
+	ND = nil
+
+}
+
+func InsertIntoCache(val string) {
+	if DLL.length == MAX_LENGTH {
+		RemoveNode()
+	}
+
+	if _, exists := m[val]; !exists {
+		Create_node(val)
+	}
+
+	ND := m[val]
+
+	ND.next = DLL.head
+	DLL.head.prev = &ND
+	DLL.head = &ND
+	DLL.length = DLL.length + 1
+
+}
+func PrintCache() {
+
+}
+
+func main() {
+	MAX_LENGTH = 5
+	DLL = DoubleLinkedList{
+		head:   nil,
+		tail:   nil,
+		length: 0,
+	}
+	for {
+		var val string
+		fmt.Println("Enter the value:")
+		fmt.Scanln(&val)
+		if val == "exit" {
+			break
+		}
+		InsertIntoCache(val)
+		PrintCache()
+	}
+
+}
