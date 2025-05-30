@@ -1,0 +1,12 @@
+mode: set
+github.com/Anshuman-02905/Golang_Mastery/Bookings/cmd/web/main.go:22.13,25.14 2 0
+github.com/Anshuman-02905/Golang_Mastery/Bookings/cmd/web/main.go:25.14,27.4 1 0
+github.com/Anshuman-02905/Golang_Mastery/Bookings/cmd/web/main.go:32.2,40.16 4 0
+github.com/Anshuman-02905/Golang_Mastery/Bookings/cmd/web/main.go:43.17,57.17 10 1
+github.com/Anshuman-02905/Golang_Mastery/Bookings/cmd/web/main.go:57.17,60.4 2 0
+github.com/Anshuman-02905/Golang_Mastery/Bookings/cmd/web/main.go:61.3,67.12 6 1
+github.com/Anshuman-02905/Golang_Mastery/Bookings/cmd/web/middleware.go:10.53,11.71 1 1
+github.com/Anshuman-02905/Golang_Mastery/Bookings/cmd/web/middleware.go:11.71,14.3 2 1
+github.com/Anshuman-02905/Golang_Mastery/Bookings/cmd/web/middleware.go:17.47,26.2 3 1
+github.com/Anshuman-02905/Golang_Mastery/Bookings/cmd/web/middleware.go:28.50,30.2 1 1
+github.com/Anshuman-02905/Golang_Mastery/Bookings/cmd/web/routes.go:12.49,39.2 19 1

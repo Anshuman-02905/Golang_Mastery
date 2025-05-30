@@ -3,8 +3,8 @@ package main
 import (
 	"net/http"
 
-	"github.com/Anshuman-02905/Golang_Mastery/Bookings/pkg/config"
-	"github.com/Anshuman-02905/Golang_Mastery/Bookings/pkg/handlers"
+	"github.com/Anshuman-02905/Golang_Mastery/Bookings/internal/config"
+	"github.com/Anshuman-02905/Golang_Mastery/Bookings/internal/handlers"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v4"
 )
@@ -20,7 +20,39 @@ func routes(app *config.AppConfig) http.Handler {
 	mux.Get("/", handlers.Repo.Home)
 	mux.Get("/about", handlers.Repo.About)
 
+	mux.Get("/generals-quaters", handlers.Repo.Generals)
+	mux.Get("/majors-suite", handlers.Repo.Majors)
+
+	mux.Get("/search-availability", handlers.Repo.Availability)
+	mux.Get("/make-reservation", handlers.Repo.Reservation)
+	mux.Post("/make-reservation", handlers.Repo.PostReservation)
+	mux.Get("/reservation-summary", handlers.Repo.ReservationSummary)
+
+	mux.Get("/choose-room/{id}", handlers.Repo.ChooseRoom)
+	mux.Get("/book-room", handlers.Repo.BookRoom)
+
+	mux.Get("/contact", handlers.Repo.Contact)
+
+	mux.Post("/search-availability", handlers.Repo.PostAvailability)
+	mux.Post("/search-availability-json", handlers.Repo.AvailabilityJSON)
+
+	mux.Get("/user/login", handlers.Repo.ShowLogin)
+	mux.Get("/user/logout", handlers.Repo.Logout)
+
+	mux.Post("/user/login", handlers.Repo.PostShowLogin)
+
 	fileServer := http.FileServer(http.Dir("./static/"))
 	mux.Handle("/static/*", http.StripPrefix("/static", fileServer))
+
+	mux.Route("/admin", func(mux chi.Router) {
+		mux.Use(Auth)
+		mux.Get("/dashboard", handlers.Repo.AdminDashboard)
+
+		mux.Get("/reservations-new", handlers.Repo.AdminNewReservations)
+		mux.Get("/reservations-all", handlers.Repo.AdminAllReservations)
+		mux.Get("/reservations-calender", handlers.Repo.AdminReservationCalender)
+
+	})
+
 	return mux
 }

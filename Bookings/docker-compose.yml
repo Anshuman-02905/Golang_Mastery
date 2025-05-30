@@ -1,0 +1,24 @@
+#version: "3.8"
+
+services:
+  db:
+    image: postgres:latest
+    container_name: bookings_db
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB:  
+
+    ports:
+      - "5432:5432"
+    volumes:
+    - ./pgdata:/var/lib/postgresql/data
+    
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: mailhog
+    restart: always
+    ports:
+      - "1025:1025"  
+      - "8025:8025"  
