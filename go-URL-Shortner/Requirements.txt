@@ -1,0 +1,9 @@
+| Step | Action                                                           |
+| ---- | ---------------------------------------------------------------- |
+| 1️⃣  | Replace `CreateClient` with `Singleton` Redis connection         |
+| 2️⃣  | Add `Factory` pattern for short URL generation                   |
+| 3️⃣  | Add `Builder` for response construction                          |
+| 4️⃣  | Extract Redis logic into a `URLService` (for better isolation)   |
+| 5️⃣  | Add `Strategy` for enforcing URL patterns                        |
+| 6️⃣  | Introduce concurrency (in Redis GET/TTL, logging, cleanup tasks) |
+| 7️⃣  | (Optional) Use `Pipeline` or background workers if traffic grows |

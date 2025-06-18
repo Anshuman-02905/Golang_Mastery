@@ -1,4 +1,4 @@
-package routes
+package handler
 
 import(
 	"go-url-shortener/database"
@@ -11,7 +11,7 @@ import(
 func ResolveUrl(c *fiber.Ctx)error{
 
 	url:= c.Params("url")
-	r:=database.CreateClient(0)
+	r:=database.GetClient(0)
 
 	defer r.Close()
 
@@ -26,7 +26,7 @@ func ResolveUrl(c *fiber.Ctx)error{
 			"error":"cannot connect to DB",
 		})}
 
-		rInr:= database.CreateClient(1)
+		rInr:= database.GetClient(1)
 		defer rInr.Close()
 
 		_=rInr.Incr(database.Ctx,"counter")

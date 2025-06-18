@@ -2,28 +2,24 @@ package main
 
 import (
 	"fmt"
+	"go-url-shortener/routes"
 	"log"
 	"os"
-
-	"go-url-shortener/routes"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
 )
 
-func setupRoutes(app *fiber.App) {
-	app.Get("/:url", routes.ResolveUrl)
-	app.Post("/api/v1", routes.ShortenURL)
-}
-
 func main() {
 	err := godotenv.Load()
 	if err != nil {
+		fmt.Println("Error At go dot env")
 		fmt.Println(err)
 	}
 	app := fiber.New()
+	routes.SetupRoutes(app)
 	app.Use(logger.New())
-
+	log.Println("THIS IS APPPORT", os.Getenv("APP_PORT"))
 	log.Fatal(app.Listen(os.Getenv("APP_PORT")))
 }

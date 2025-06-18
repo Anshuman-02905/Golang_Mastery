@@ -1,0 +1,1 @@
+FOR VARABLE CHANNEL Alternative: Use a Slice with a Mutex or Channel
