@@ -4,6 +4,8 @@ import (
 	"go-url-shortener/database"
 	"go-url-shortener/helpers"
 	"go-url-shortener/internal/builder"
+	"go-url-shortener/internal/logx"
+	"go-url-shortener/internal/repository"
 	"go-url-shortener/internal/strategy"
 	"go-url-shortener/internal/utils"
 
@@ -13,24 +15,32 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 )
 
 func ShortenURL(c *fiber.Ctx) error {
+
 	body, err := utils.ParseRequst(c)
 
-	log.Printf("Received request from IP %s for URL %s, CustomShort %s, & Expiry %s", c.IP(), body.URL, body.CustomShort, body.Expiry)
-
-	
-
+	if err != nil {
+		logx.Error("Error at Parsing the request")
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"errot":    err.Error(),
+			"location": "At Parsing Request",
+		})
+	}
+	logx.Info("Requst Parsing is done")
+	logx.Info("Starting EnforceRateLimit")
 	ok, err, info := utils.EnforceRateLimit(c)
 	if !ok {
+		logx.Info("Enforce Limit Returned not ok")
 		if err != nil && err.Error() == "rate limit exceeded" {
+			logx.Error("Error RATE LIMIT EXCEEDED")
 			return c.Status(fiber.StatusServiceUnavailable).JSON(fiber.Map{
 				"error": err.Error(),
 				"info":  info,
 			})
 		}
+		logx.Error("Some Error in Rate limit")
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "rate limiter internal error",
 		})
@@ -54,7 +64,6 @@ func ShortenURL(c *fiber.Ctx) error {
 
 	body.URL = helpers.EnforceHTTP(body.URL)
 
-
 	//Strategy Pattern
 	var strat strategy.IDStrategy
 	if body.CustomShort == "" {
@@ -62,42 +71,39 @@ func ShortenURL(c *fiber.Ctx) error {
 	} else {
 		strat = strategy.CustomStrategy{}
 	}
-	id, err := strat.Generate(body)
+	//CHECK URL
+	id, _ := strat.Generate(body)
 
+	urlRepo := repository.NewUrlRepository(database.GetClient(0), database.Ctx)
 
-
-	rds0 := database.GetClient(0)
-	defer rds0.Close()
-
-	val, err = rds0.Get(database.Ctx, id).Result()
-
-	if val != "" {
-		log.Printf("%s provided in already use URL and the val is %v", c.IP(), val)
-		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
-			"error": "No Url found at Database",
+	ok, val, err := urlRepo.Exists(id)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Error at fetching data from Database",
 		})
-	} else if err != nil {
-		c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Error at fetching data from Databse",
+	}
+	if ok {
+		log.Printf("%s provided an already-used short URL. Value: %v", c.IP(), val)
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+			"error": "Short URL already in use",
 		})
 	}
 
 	if body.Expiry == 0 {
 		body.Expiry = 24
 	}
-	err = rds0.Set(database.Ctx, id, body.URL, body.Expiry*3600*time.Second).Err()
-	if err != nil {
+	if err := urlRepo.Save(id, body.URL, body.Expiry*3600*time.Second); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Unable to connect to server",
+			"error": "Unable to save to database",
 		})
 	}
 
-	val, _ = rds1.Get(database.Ctx, c.IP()).Result()
-	log.Printf("Value after devrement%v", val)
-	ttl, _ := rds1.TTL(database.Ctx, c.IP()).Result()
+	rateRepo := repository.NewRateLimitRepository(database.GetClient(1), database.Ctx)
+	val, _ = rateRepo.GetQouta(c.IP())
+	ttl, _ := rateRepo.GetTTL(c.IP())
 	XRateRemaining, _ := strconv.Atoi(val)
 	XRateLimitReset := ttl / time.Nanosecond / time.Minute
-	rds1.Decr(database.Ctx, c.IP())
+	_ = rateRepo.DecrementQuota(c.IP())
 
 	//Used builder pattern to generate the response
 	response := builder.NewReponseBuilder().

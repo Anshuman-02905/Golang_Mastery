@@ -15,7 +15,7 @@ type URLrepository struct {
 func NewUrlRepository(client *redis.Client, ctx context.Context) *URLrepository {
 	return &URLrepository{client: client, ctx: ctx}
 }
-func (r URLrepository) Exits(id string) (bool, string, error) {
+func (r URLrepository) Exists(id string) (bool, string, error) {
 	val, err := r.client.Get(r.ctx, id).Result()
 	if err == redis.Nil {
 		return false, "", nil
