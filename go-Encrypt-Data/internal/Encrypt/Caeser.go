@@ -27,12 +27,13 @@ func (c *Caeser) applyShift(data string, shift int) string {
 	for _, c := range data {
 
 		if c >= 'A' && c <= 'Z' {
-			result.WriteRune('A' + (c - 'A' + rune(shift)%26))
+			shifted := ((int(c-'A') + shift) % 26) + 'A'
+			result.WriteRune(rune(shifted))
 		} else if c >= 'a' && c <= 'z' {
-			result.WriteRune('a' + (c - 'a' + rune(shift)%26))
-		} else {
-			result.WriteRune(c)
+			shifted := ((int(c-'a') + shift) % 26) + 'a'
+			result.WriteRune(rune(shifted))
 		}
+
 	}
 	return result.String()
 }
