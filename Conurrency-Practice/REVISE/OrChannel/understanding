@@ -1,0 +1,17 @@
+It is used to close channels upon multiple signals 
+ So Yes, You're Right:
+✅ Default case fires a goroutine
+✅ Case 2 also fires a goroutine
+✅ Each goroutine is blocking on select
+✅ When any signal is received → the goroutine closes its orDone
+✅ The closure of orDone is itself the signal
+
+
+✅ Summary in Plain English
+The recursive or() channel pattern:
+
+Spins up a goroutine at each level of recursion (except base case).
+That goroutine does a select on two or more channels.
+As soon as any input channel receives a signal (i.e., is closed), the goroutine:
+Closes its own orDone channel, signaling cancellation.
+This closed orDone ripples back up to cancel all others

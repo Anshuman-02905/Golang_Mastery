@@ -1,0 +1,55 @@
+Context.Context
+Helps to ease  cancellation apis which wraps Deadlines type of error and custome data as well
+in short Value Propogation and Cancellation
+
+Exactly! To create a **child context** that can be canceled (or timed out, or have a deadline), you start from a **parent context** and use one of the functions like `WithCancel`, `WithTimeout`, or `WithDeadline`.
+
+---
+
+### How to create a child context with cancellation:
+
+```go
+parentCtx := context.Background() // root context
+childCtx, cancelFunc := context.WithCancel(parentCtx)
+defer cancelFunc()
+```
+
+* Here, `childCtx` is the child context derived from `parentCtx`.
+* Calling `cancelFunc()` cancels **only the child context**.
+* If `parentCtx` gets canceled, `childCtx` also gets canceled automatically.
+
+---
+
+### Other ways to create child contexts:
+
+```go
+childCtx, cancelFunc := context.WithTimeout(parentCtx, 2*time.Second)  // cancels after timeout
+childCtx, cancelFunc := context.WithDeadline(parentCtx, time.Now().Add(1*time.Minute)) // cancels at deadline
+childCtx := context.WithValue(parentCtx, "key", "value")  // adds key-value, no cancellation
+```
+
+---
+
+### Summary:
+
+| Function       | Requires Parent Context? | Cancels Child When Parent Cancels? |
+| -------------- | ------------------------ | ---------------------------------- |
+| `WithCancel`   | Yes                      | Yes                                |
+| `WithTimeout`  | Yes                      | Yes                                |
+| `WithDeadline` | Yes                      | Yes                                |
+| `WithValue`    | Yes                      | No (no cancellation)               |
+
+---
+
+So yes, **to create a cancellable child context, you pass the parent context to `WithCancel` (or related functions).**
+
+---
+
+Want me to show a simple code snippet demonstrating this?
+
+
+Feature	WithTimeout	WithDeadline
+What it sets	A duration (e.g. "cancel after 5 seconds")	A fixed point in time (e.g. "cancel at 3:00 PM")
+Type of argument	time.Duration	time.Time
+Use case	When you want a relative delay	When you know the absolute cutoff time
+Example use	2 seconds from now	exactly at 10:00:00 AM UTC

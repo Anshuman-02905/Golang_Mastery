@@ -1,0 +1,2 @@
+
+“Queuing is basically lag in request rather than request denied.”

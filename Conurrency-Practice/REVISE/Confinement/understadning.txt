@@ -1,0 +1,17 @@
+when I am sharing variable copies then its ad hoc because It depends on data
+lexical is when variables are confined structurally and other goroutines cannot access
+
+You share copies of data (e.g., via function parameters).
+It's dependent on programmer discipline — you must ensure no shared state.
+Example: passing loop variables to goroutines so each gets its own value.
+It's flexible but error-prone if not careful (e.g., loop variables captured without copying).
+
+
+Perfect framing — you're articulating the key concurrency design difference between ad hoc and lexical confinement beautifully.
+
+Go ahead and share your example code below — I’ll help you validate and refine it if needed.
+
+From your statement:
+
+✅ Ad hoc: data is shared by value, and it's the developer’s responsibility to ensure safety.
+✅ Lexical: data is structurally confined to a goroutine, and communication happens only via channels — much safer by design.

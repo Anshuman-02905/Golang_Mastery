@@ -1,0 +1,5 @@
+For Select Group is used in Cancellation via Done channel which helps in Preventing GO Routine Leaks
+
+In a leaky goroutine, the return is either absent or logically unreachable 
+(e.g., stuck on a blocking operation like a channel read). This causes the goroutine to never 
+exit, even after main ends or the parent context is done.

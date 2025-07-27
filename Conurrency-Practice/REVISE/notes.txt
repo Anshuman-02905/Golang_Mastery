@@ -1,0 +1,68 @@
+In golang 
+kernel threads they are managed by OS where os manages the scheduling / Context Switching & Synchorization
+When OS has fair scheduling  true multithreading 
+Examples of OS kernel POSIX threads / JAVA Threads / GOLANG OS Threads
+
+Green Threads managed by USer space
+Allows massive Concurrency
+
+Application threads are the ones managed by the appiatio itself
+
+| Feature           | Kernel Threads         | Green Threads              | Application Threads     |
+| ----------------- | ---------------------- | -------------------------- | ----------------------- |
+| Managed by        | OS Kernel              | User-space runtime         | Application itself      |
+| True parallelism  | ✅ Yes                  | ❌ No (unless mapped)       | Depends on thread type  |
+| Context switching | Slower (kernel)        | Faster (user-space)        | Depends                 |
+| Blocking behavior | Independent per thread | All blocked if one blocks  | Depends                 |
+| Use case examples | Java, Go (OS threads)  | Early JVMs, Erlang, Python | Any app-created threads |
+
+
+--------------------------------
+For Kernel We have OS Schedulers  FIFO QUEUE 
+FOR GREEN threads we have USER Schedulers
+
+For Goroutines we have GO scheduler 
+Idle threads "steal" tasks from busier ones
+------------------------------------------
+When a Parent task split into Children Task and waits for them to finish is called FORK & JOIN 
+Spawing : Chilren are created Go Routines / UNIX Fork / Java threads
+LifeCycle  : The Lifespan of a Child thread it may or may not die before the Parent
+--------------------------------------------
+
+Tools for concurrecny  : Sync.WaitGroup
+
+BUIDLING BLOCKS  of the sync package
+1) Waitgroup  
+2)Mutex  RWMUTEX
+3)COND
+4)Once
+5) pool
+6)Channel
+7)Select
+ 
+--------------------------------
+Patterns 
+Confinemet
+For Select Loop 
+Preventing Go ROutine Leaks
+Or Channel
+Error Handling
+Pipeline 
+Best Practices
+Generators 
+
+Fanout fan in
+OrDone Channel is used to simplify the iteration of a channel
+TeeChannel Tee channle is used to split a single stream into two identical stremas
+Bridge channel USED TO FLATTEN A STREAM OF STREAMs where we use Ordone pattern as well
+
+| Pattern  | Input Type          | Output Type            | Purpose                            |
+| -------- | ------------------- | ---------------------- | ---------------------------------- |
+| `orDone` | `<-chan T`, `done`  | `<-chan T`             | Safe channel iteration with cancel |
+| `tee`    | `<-chan T`          | `(<-chan T, <-chan T)` | Duplicate stream to 2 outputs      |
+| `bridge` | `<-chan (<-chan T)` | `<-chan T`             | Flatten a stream of streams        |
+
+ 
+------------------------------------
+
+QUEUEING & CONTEXT PACKAGE
